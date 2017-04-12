@@ -1,6 +1,8 @@
+#!/usr/bin/python3
 import requests
 import os
 import json
+import argparse
 
 def geturlorjson(url, fname):
     if os.path.exists(fname):
@@ -13,19 +15,30 @@ def geturlorjson(url, fname):
             f.write(json.dumps(_json))
     return _json
 
-showname = ''
+parser = argparse.ArgumentParser(description='Parse OST for TV shows from tunefind')
+parser.add_argument('showname', metavar='showname', type=str, help='show name')
+args = parser.parse_args()
+showname = args.showname
+
+if showname == '' or showname is None:
+    print('Show name is required')
+    exit()
 
 os.makedirs('cache', exist_ok=True)
 
-seasons_url = "https://www.tunefind.com/api/frontend/show/%s?fields=seasons&metatags=1" % showname
+seasons_url = 'https://www.tunefind.com/api/frontend/show/%s?fields=seasons&metatags=1' % showname
 r = requests.get(seasons_url)
 _json = r.json()
+if len(_json) == 0:
+    print('Can\'t get data for show')
+    exit()
+
 season_cnt = int(len(_json['seasons']))
 
 for x in range(1, season_cnt):
     print('# Season %d #' % x)
 
-    season_url = "http://www.tunefind.com/api/frontend/show/%s/season/%s?fields=episodes,theme-song,music-supervisors&metatags=1" % (showname, x)
+    season_url = 'http://www.tunefind.com/api/frontend/show/%s/season/%s?fields=episodes,theme-song,music-supervisors&metatags=1' % (showname, x)
     _json = geturlorjson(season_url, 'cache/%s_s%s.json' % (showname, x))
 
     for e in _json['episodes']:
