@@ -13,7 +13,7 @@ def geturlorjson(url, fname):
             f.write(json.dumps(_json))
     return _json
 
-showname = 'supernatural'
+showname = ''
 
 os.makedirs('cache', exist_ok=True)
 
