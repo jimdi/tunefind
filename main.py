@@ -25,6 +25,7 @@ if showname == '' or showname is None:
     exit()
 
 os.makedirs('cache', exist_ok=True)
+os.makedirs('result', exist_ok=True)
 
 seasons_url = 'https://www.tunefind.com/api/frontend/show/%s?fields=seasons&metatags=1' % showname
 r = requests.get(seasons_url)
@@ -35,23 +36,27 @@ if len(_json) == 0:
 
 season_cnt = int(len(_json['seasons']))
 
+fout = open('result/' + str(showname) + '.md', 'w', encoding='utf-8')
+
 for x in range(1, season_cnt):
-    print('# Season %d #' % x)
+    fout.write('# Season %d #\r\n' % x)
 
     season_url = 'http://www.tunefind.com/api/frontend/show/%s/season/%s?fields=episodes,theme-song,music-supervisors&metatags=1' % (showname, x)
     _json = geturlorjson(season_url, 'cache/%s_s%s.json' % (showname, x))
 
     for e in _json['episodes']:
-        print('## ==> S%0.2dE%0.2d - %s.txt <== ##' % (int(x), int(e['number']), e['name']))
+        fout.write('## ==> S%0.2dE%0.2d - %s.txt <== ##\r\n' % (int(x), int(e['number']), e['name']))
 
-        episode_url = "http://www.tunefind.com/api/frontend/episode/%s?fields=song-events,questions" % e['id']
+        episode_url = 'http://www.tunefind.com/api/frontend/episode/%s?fields=song-events,questions' % e['id']
         _json = geturlorjson(episode_url, 'cache/%s.json' % (e['id']))
 
         for s in _json['song_events']:
-            print('* Song: %s - %s\r\n' % (s['song']['artist']['name'], s['song']['name']))
+            fout.write('* Song: %s - %s\r\n' % (s['song']['artist']['name'], s['song']['name']))
             if s['song']['album']:
-                print('  Album: %s\r\n' % s['song']['album'])
+                fout.write('  Album: %s\r\n' % s['song']['album'])
             if s['description']:
-                print('  Description: %s\r\n' % s['description'])
+                fout.write('  Description: %s\r\n' % s['description'])
             else:
-                print('\r\n')
+                fout.write('\r\n')
+
+fout.close()
