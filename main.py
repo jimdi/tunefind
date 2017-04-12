@@ -45,18 +45,16 @@ for x in range(1, season_cnt):
     _json = geturlorjson(season_url, 'cache/%s_s%s.json' % (showname, x))
 
     for e in _json['episodes']:
-        fout.write('## ==> S%0.2dE%0.2d - %s.txt <== ##\r\n' % (int(x), int(e['number']), e['name']))
+        fout.write('## ==> S%0.2dE%0.2d - %s.txt <== ##\r\n' % (int(x), int(e['number']), e['name'].strip()))
 
         episode_url = 'http://www.tunefind.com/api/frontend/episode/%s?fields=song-events,questions' % e['id']
         _json = geturlorjson(episode_url, 'cache/%s.json' % (e['id']))
 
         for s in _json['song_events']:
-            fout.write('* Song: %s - %s\r\n' % (s['song']['artist']['name'], s['song']['name']))
+            fout.write('* Song: %s - %s\r\n' % (s['song']['artist']['name'].strip(), s['song']['name'].strip()))
             if s['song']['album']:
-                fout.write('  Album: %s\r\n' % s['song']['album'])
+                fout.write('  Album: %s\r\n' % s['song']['album'].strip())
             if s['description']:
-                fout.write('  Description: %s\r\n' % s['description'])
-            else:
-                fout.write('\r\n')
+                fout.write('  Description: %s\r\n' % s['description'].strip().replace('\r', '').replace('\n', ''))
 
 fout.close()
