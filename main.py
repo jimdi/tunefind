@@ -54,7 +54,7 @@ for x in range(1, season_cnt+1):
             episode_url = 'http://www.tunefind.com/api/frontend/episode/%s?fields=song-events,questions' % e['id']
             _json = geturlorjson(episode_url, 'cache/%s.json' % (e['id']))
 
-            for s in _json['song_events']:
+            for s in _json['episode']['song_events']:
                 fout.write('* Song: %s - %s\r\n' % (s['song']['artist']['name'].strip(), s['song']['name'].strip()))
                 if s['song']['album']:
                     fout.write('  Album: %s\r\n' % s['song']['album'].strip())
