@@ -31,8 +31,12 @@ os.makedirs('result', exist_ok=True)
 
 seasons_url = 'https://www.tunefind.com/api/frontend/show/%s?fields=seasons&metatags=1' % showname
 r = requests.get(seasons_url)
+if r.status_code == 404:
+    print('404. Nothing found for', showname)
+    exit()
+
 _json = r.json()
-if len(_json) == 0:
+if len(_json) == 0 and r.status_code == 200:
     print('Can\'t get data for show')
     exit()
 
@@ -49,16 +53,17 @@ for x in range(1, season_cnt+1):
 
     if _json:
         for e in _json['episodes']:
-            fout.write('## ==> S%0.2dE%0.2d - %s.txt <== ##\r\n' % (int(x), int(e['number']), e['name'].strip()))
+            fout.write('## ==> S%0.2dE%0.2d - %s <== ##\r\n' % (int(x), int(e['number']), e['name'].strip()))
 
             episode_url = 'http://www.tunefind.com/api/frontend/episode/%s?fields=song-events,questions' % e['id']
             _json = geturlorjson(episode_url, 'cache/%s.json' % (e['id']))
 
             for s in _json['episode']['song_events']:
-                fout.write('* Song: %s - %s\r\n' % (s['song']['artist']['name'].strip(), s['song']['name'].strip()))
-                if s['song']['album']:
-                    fout.write('  Album: %s\r\n' % s['song']['album'].strip())
-                if s['description']:
-                    fout.write('  Description: %s\r\n' % s['description'].strip().replace('\r', '').replace('\n', ''))
+                for a in s['song']['artists']:
+                    fout.write('* Song: %s - %s\r\n' % (a['name'].strip(), s['song']['name'].strip()))
+                    if s['song']['album']:
+                        fout.write('  Album: %s\r\n' % s['song']['album'].strip())
+                    if s['description']:
+                        fout.write('  Description: %s\r\n' % s['description'].strip().replace('\r', '').replace('\n', ''))
 
 fout.close()
